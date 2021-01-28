@@ -13,7 +13,7 @@ func Lipsum(count int) string {
     if count > len(array) {
         count = len(array)
     }
-    tmp := array[:length]
+    tmp := array[:count]
     result := strings.Join(tmp, " ")
     return result
 }
