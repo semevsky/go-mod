@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -15,28 +16,25 @@ import (
 type Config map[string]string
 
 func LoadFile(path string) (c Config, err error) {
-	var file *os.File
-	file, err = os.Open(path)
+	var buffer []byte
+	buffer, err = ioutil.ReadFile(path)
 	if err != nil {
 		return
 	}
-	defer file.Close()
 
-	reader := bufio.NewReader(file)
+	input := string(buffer)
 
-	c = load(reader)
+	c = LoadString(input)
 	return
 }
 
-func LoadString(data string) (c Config) {
-	reader := bufio.NewReader(strings.NewReader(data))
-	c = load(reader)
-	return
-}
-
-func load(reader *bufio.Reader) (c Config) {
+func LoadString(input string) (c Config) {
 	c = make(Config)
-	for line, err1 := reader.ReadString('\n'); err1 == nil; line, err1 = reader.ReadString('\n') {
+
+	scanner := bufio.NewScanner(strings.NewReader(input))
+
+	for scanner.Scan() {
+		line := scanner.Text()
 		err := c.parse(line)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)

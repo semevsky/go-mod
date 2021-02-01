@@ -14,7 +14,7 @@ uint=123
 float=123.45
 bool=true
 boolNeg=off
-`
+last=last`
 
 var config Config
 
@@ -89,6 +89,7 @@ func TestConfig_GetString(t *testing.T) {
 	}{
 		{name: "positive", c: config, args: args{name: "string", defaultValue: "Lorem ipsum"}, want: "Lorem ipsum"},
 		{name: "default", c: config, args: args{name: "none", defaultValue: "none"}, want: "none"},
+		{name: "eof", c: config, args: args{name: "last", defaultValue: ""}, want: "last"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
