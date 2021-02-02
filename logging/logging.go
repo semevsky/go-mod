@@ -36,20 +36,16 @@ func ResetTimeFormat() {
 	layout = DEFAULT_LAYOUT
 }
 
-// set access mode to log directories
-// may be 0750 or 0700
-func SetDirAccess(mode os.FileMode) {
-	dirAccess = mode
+// Set file/directory access
+// fMode - file acces, e.g. 0644 or 0640
+// dMode - directory access, e.g. 0750 or 0700
+func SetMode(fMode, dMode os.FileMode) {
+	fileAccess = fMode
+	dirAccess = dMode
 }
 
-// set access mode to log files
-// may be 0640 or 0600
-func SetFileAccess(mode os.FileMode) {
-	fileAccess = mode
-}
-
-// reset to default values, 0755 - for dir, 0644 - for file
-func ResetDirFileAccess() {
+// file/directory access to default values: 0644/0755
+func ResetMode() {
 	dirAccess = DEFAULT_DIR_ACCESS
 	fileAccess = DEFAULT_FILE_ACCESS
 }

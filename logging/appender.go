@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DEFAULT_DIR_ACCESS = 0755
+	DEFAULT_DIR_ACCESS  = 0755
 	DEFAULT_FILE_ACCESS = 0644
 )
 
@@ -75,7 +75,32 @@ func (a *Appender) close() (err error) {
 }
 
 func (a *Appender) open() (err error) {
-	a.file, a.buffer, a.writer, err = openFile(a.filename, a.size)
+	if a.filename == "" { // stdout
+		a.writer = os.Stdout
+	} else if a.filename == "/dev/null" {
+		a.writer = ioutil.Discard
+	} else {
+		dir := path.Dir(a.filename)
+		_, err = os.Stat(dir)
+		if err != nil {
+			err = os.MkdirAll(dir, dirAccess)
+		}
+		if err == nil {
+			a.file, err = os.OpenFile(a.filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, fileAccess)
+		}
+		if err == nil {
+			if a.size > 0 {
+				a.buffer = bufio.NewWriterSize(a.file, a.size)
+				a.writer = a.buffer
+			} else {
+				a.writer = a.file
+			}
+		} else {
+			// log to stdout if can't open log file
+			println(err.Error())
+			a.writer = os.Stdout
+		}
+	}
 	return
 }
 
@@ -83,32 +108,6 @@ func (a *Appender) reopen() (err error) {
 	err = a.close()
 	if err == nil {
 		err = a.open()
-	}
-	return
-}
-
-func openFile(filename string, size int) (file *os.File, buffer *bufio.Writer, writer io.Writer, err error) {
-	if filename == "" {
-		writer = os.Stdout
-	} else if filename == "/dev/null" {
-		writer = ioutil.Discard
-	} else {
-		dir := path.Dir(filename)
-		_, err = os.Stat(dir)
-		if err != nil {
-			err = os.MkdirAll(dir, dirAccess)
-		}
-		if err == nil {
-			file, err = os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, fileAccess)
-		}
-		if err == nil {
-			if size > 0 {
-				buffer = bufio.NewWriterSize(file, size)
-				writer = buffer
-			} else {
-				writer = file
-			}
-		}
 	}
 	return
 }
