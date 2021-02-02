@@ -50,7 +50,10 @@ func ResetMode() {
 	fileAccess = DEFAULT_FILE_ACCESS
 }
 
-// name
+// name - ID
+// level - log no more than this log level
+// filename - path, empty string means stdout
+// size - buffer size, <= 0 means no buffering, write to file immediately
 func AddAppender(name string, level int, filename string, size int) {
 	var wg sync.WaitGroup
 	wg.Add(1)
