@@ -59,7 +59,7 @@ func AddAppender(name string, level int, filename string, size int) {
 	wg.Wait()
 }
 
-func Remove(name string) {
+func RemoveAppender(name string) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	c := command{cmd: REMOVE, name: name, wg: &wg}
@@ -67,7 +67,8 @@ func Remove(name string) {
 	wg.Wait()
 }
 
-func Reopen(name string) {
+// reopen particular appender
+func ReopenAppender(name string) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	c := command{cmd: REOPEN, name: name, wg: &wg}
@@ -86,6 +87,7 @@ func ReopenAll() {
 	wg.Wait()
 }
 
+// closes all appenders
 func RemoveAll() {
 	var wg sync.WaitGroup
 	wg.Add(len(appenders))
@@ -137,7 +139,6 @@ func execute() {
 					err = a.reopen()
 				}
 			}
-
 			c.done()
 
 			if err != nil {

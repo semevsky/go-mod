@@ -21,7 +21,7 @@ func main() {
 	logger.LogSync(logging.INFO, "Just a test")
 	logging.ResetTimeFormat()
 	logger.LogSync(logging.INFO, "Just a test")
-	logging.Remove("time")
+	logging.RemoveAppender("time")
 
 	logName := "_tmp/log.log"
 	backupName := "_tmp/log.bak"
@@ -32,7 +32,7 @@ func main() {
 
 	count := 0
 
-	for ;count < 1000; count++ {
+	for ; count < 1000; count++ {
 		logger.Info("just a test " + strconv.Itoa(count))
 	}
 	// note: this doesn't work on Windows
@@ -43,7 +43,7 @@ func main() {
 	logging.ReopenAll()
 	logger.LogSync(logging.INFO, "reopened")
 
-	for ;count < 1100; count++ {
+	for ; count < 1100; count++ {
 		logger.Info("just a test " + strconv.Itoa(count))
 	}
 	logger.LogSync(logging.INFO, "closing")
