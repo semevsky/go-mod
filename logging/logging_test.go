@@ -13,6 +13,12 @@ var logger Logger
 
 func BenchmarkLog(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		logger.Info("just a test")
+		logger.Log(INFO, "just a test")
+	}
+}
+
+func BenchmarkLogSync(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		logger.LogSync(INFO, "just a test")
 	}
 }
