@@ -18,7 +18,12 @@ func init() {
 	go execute()
 }
 
+// Creates new Logger
+// if there are no appenders - creates new one with empty name, TRACE, stdout, no buffer
 func GetLogger(category string) Logger {
+	if len(appenders) == 0 {
+		AddAppender("", TRACE, "", 0)
+	}
 	return Logger{category}
 }
 
@@ -60,6 +65,10 @@ func AddAppender(name string, level int, filename string, size int) {
 	c := command{cmd: ADD, name: name, level: level, filename: filename, size: size, wg: &wg}
 	commandChannel <- &c
 	wg.Wait()
+
+	if c.err != nil {
+		println(c.err)
+	}
 }
 
 func RemoveAppender(name string) {
@@ -68,6 +77,10 @@ func RemoveAppender(name string) {
 	c := command{cmd: REMOVE, name: name, wg: &wg}
 	commandChannel <- &c
 	wg.Wait()
+
+	if c.err != nil {
+		println(c.err)
+	}
 }
 
 // reopen particular appender
@@ -77,28 +90,38 @@ func ReopenAppender(name string) {
 	c := command{cmd: REOPEN, name: name, wg: &wg}
 	commandChannel <- &c
 	wg.Wait()
+
+	if c.err != nil {
+		println(c.err)
+	}
 }
 
 // reopen all existing appenders
 func ReopenAll() {
-	var wg sync.WaitGroup
-	wg.Add(len(appenders))
-	for name := range appenders {
-		c := command{cmd: REOPEN, name: name, wg: &wg}
-		commandChannel <- &c
-	}
-	wg.Wait()
+	broadcast(REOPEN)
 }
 
 // closes all appenders
 func RemoveAll() {
+	broadcast(REMOVE)
+}
+
+func broadcast(cmd int) {
+	var cmds []*command
 	var wg sync.WaitGroup
 	wg.Add(len(appenders))
 	for name := range appenders {
-		c := command{cmd: REMOVE, name: name, wg: &wg}
+		c := command{cmd: cmd, name: name, wg: &wg}
 		commandChannel <- &c
+		cmds = append(cmds, &c)
 	}
 	wg.Wait()
+
+	for _, c := range cmds {
+		if c.err != nil {
+			println(c.err)
+		}
+	}
 }
 
 // logging goroutine executing commands and writing data to log
@@ -142,11 +165,7 @@ func execute() {
 					err = a.reopen()
 				}
 			}
-			c.done()
-
-			if err != nil {
-				println(err.Error())
-			}
+			c.done(err)
 		}
 	}
 }

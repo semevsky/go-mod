@@ -24,6 +24,8 @@ type command struct {
 	filename string
 	size     int
 
+	err error
+
 	wg *sync.WaitGroup
 }
 
@@ -32,7 +34,8 @@ func (c *command) String() string {
 	return cmdName[c.cmd] + " " + c.name + " " + levelName[c.level] + " \"" + c.filename + "\""
 }
 
-func (c *command) done() {
+func (c *command) done(err error) {
+	c.err = err
 	if c.wg != nil {
 		c.wg.Done()
 	}
