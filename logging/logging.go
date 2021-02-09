@@ -18,13 +18,10 @@ func init() {
 	go execute()
 }
 
-// Creates new Logger
+// Creates new logger
 // if there are no appenders - creates new one with empty name, TRACE, stdout, no buffer
 func GetLogger(category string) Logger {
-	if len(appenders) == 0 {
-		AddAppender("", TRACE, "", 0)
-	}
-	return Logger{category}
+	return &logger{category}
 }
 
 func GetLevel(name string) (level int) {
